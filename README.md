@@ -43,7 +43,7 @@ git clone https://github.com/Mattani/redmine-rocky-ansible.git
 ### ダウンロードしたプレイブック内のファイル `group_vars/redmineserver` を編集
 
 * Redmine/RedMicaの選択／バージョンの選択
-  * `redmine_git_url` はRedmine/RedMicaどちらかを選択してください。（選択するしないほうの `redmine_git_url` を `#`でコメントアウトしてください）
+  * `redmine_git_url` はRedmine/RedMicaどちらかを選択してください。（選択しないほうの `redmine_git_url` を `#`でコメントアウトしてください）
   * `redmine_version` はRedmine/RedMicaのリポジトリで定義されているタグ名をご使用ください
 * PostgreSQLに設定するパスワードの変更
   * `db_passwd_redmine` を適当な内容に変更してください。これはPostgreSQLのRedmine用ユーザー redmine に設定されるパスワードです。
