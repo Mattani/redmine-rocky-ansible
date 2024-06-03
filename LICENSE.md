@@ -1,6 +1,7 @@
 The MIT License (MIT)
 
 Original work Copyright (c) 2015 [Far End Technologies Corporation](http://www.farend.co.jp/)
+
 Modified work Copyright (c) 2024 H.Matsutani -- staff of [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://redmine-japan.org/) 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
