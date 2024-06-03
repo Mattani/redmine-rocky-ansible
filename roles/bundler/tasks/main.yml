@@ -1,0 +1,20 @@
+- name: Install Bundler
+  gem:
+    name: bundler
+    state: present
+    executable: /usr/local/rbenv/shims/gem
+
+- name: Update Bundler to the latest version
+  gem:
+    name: bundler
+    state: latest
+    executable: /usr/local/rbenv/shims/gem
+
+- name: Verify Bundler version
+  command: bundler --version
+  register: bundler_version
+
+- name: Show Bundler version
+  debug:
+    msg: "Bundler version is {{ bundler_version.stdout }}"
+
