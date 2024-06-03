@@ -12,6 +12,7 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 
 ただし以下の点はMattaniが独自の修正をいれております
 
+* OSはRocky Linux 8.9を使用します
 * Rubyはrbenvによりインストールします
 
 ## システム構成
