@@ -65,6 +65,9 @@ MIT License
 
 ## 作者
 
-Mattani -- Redmine.tokyo/Redmine Japanスタッフ
+Mattani -- [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://redmine-japan.org/)スタッフ
+
+このプレイブックはファーエンドテクノロジー株式会社作成の [`farend/redmine-centos-ansible`](https://github.com/farend/redmine-centos-ansible)  をベースに作成いたしました
+
 Thanks to [ファーエンドテクノロジー株式会社](http://www.farend.co.jp/)
 
