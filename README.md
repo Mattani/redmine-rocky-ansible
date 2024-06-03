@@ -70,7 +70,7 @@ MIT License
 
 ## 改変者
 
-Mattani -- [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://redmine-japan.org/)スタッフ
+H.Matsutani -- [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://redmine-japan.org/)スタッフ
 
 このプレイブックはファーエンドテクノロジー株式会社作成の [`farend/redmine-centos-ansible`](https://github.com/farend/redmine-centos-ansible)  をベースに改変したものです
 
