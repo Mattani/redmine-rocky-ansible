@@ -41,7 +41,7 @@
 - name: RubyとPassengerのビルドに必要な開発ツールやヘッダファイルのインストール
   become: yes
   yum:
-    name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libffi-devel'
+    name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libyaml-devel,libffi-devel'
 
 - name:  PostgreSQLとヘッダファイルのインストール
   become: yes
@@ -54,7 +54,7 @@
     name='httpd,httpd-devel'
 
 - name: powertoolのインストール
-  shell: dnf config-manager --set-enabled powertools warn=no
+  shell: dnf config-manager --set-enabled powertools
 
 - name: ImageMagickとヘッダファイル・日本語フォントのインストール
   become: yes

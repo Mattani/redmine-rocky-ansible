@@ -1,8 +1,9 @@
 - name: Redmineのソースコードをチェックアウト
   become: yes
-  subversion:
-    repo={{ redmine_svn_url }}
+  git:
+    repo={{ redmine_git_url }}
     dest={{ redmine_dir }}
+    version={{ redmine_version }}
 
 - name: database.ymlの作成
   become: yes
@@ -28,17 +29,38 @@
   failed_when: result_test_gemfile.rc not in [0, 1]
   changed_when: false
 
-- name: gemsパッケージのインストール
+- name: bundle config path
   become: yes
-  command:
-    bundle install --path vendor/bundle
-    chdir={{ redmine_dir }}
+  shell: bundle config set --local path 'vendor/bundle'
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when:
     result_test_gemfile.rc == 1
 
-- name: gemsパッケージのアップデート
+- name: bundle config without
+  become: yes
+  shell: bundle config set --local without 'development test'
+  args:
+    chdir: "{{ redmine_dir }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  when:
+    result_test_gemfile.rc == 1
+
+- name: bundle install
+  become: yes
+  shell: bundle install
+  args:
+    chdir: "{{ redmine_dir }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  when:
+    result_test_gemfile.rc == 1
+  register: bundle_install_result
+
+- name: bundle update
   become: yes
   command:
     bundle update
@@ -47,6 +69,17 @@
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when:
     result_test_gemfile.rc == 0
+
+#- name: gem update base64
+#  become: yes
+#  shell: gem update base64
+#  args:
+#    chdir: "{{ redmine_dir }}"
+#  environment:
+#    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+#  when:
+#    result_test_gemfile.rc == 1
+#  register: bundle_install_result
 
 - name: secret tokenの作成
   become: yes

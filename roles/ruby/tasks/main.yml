@@ -1,56 +1,70 @@
 - name: Rubyがインストールされているか確認
-  command:
-    test -f {{ ruby_file_name }}
-  register:
-    ruby_test_vars
-  failed_when: ruby_test_vars.rc not in [0, 1]
-  changed_when: false
+  ansible.builtin.command: ruby -v
+  register: ruby_version_output
+  ignore_errors: yes
 
-- name: Rubyがダウンロード済みか確認
-  command:
-    test -f {{ work_dir }}/{{ ruby_archive_version }}
-  register:
-    ruby_src_test_vars
-  failed_when: ruby_test_vars.rc not in [0, 1]
-  changed_when: false
+- name: Check if Ruby is installed
+  ansible.builtin.set_fact:
+    ruby_installed: "{{ ruby_version_output.rc == 0 }}"
 
-- name: Rubyのソースコードのダウンロード
-  get_url:
-    url={{ ruby_url_dir }}/{{ ruby_archive_name }}
-    dest={{ work_dir }}
-  when: ruby_test_vars.rc == 1 and ruby_src_test_vars.rc == 1
+#- name: Debug message
+#  debug:
+#    msg: "Ruby is {{ 'installed' if ruby_installed else 'not installed' }}"
 
-- name: Rubyのソースコードを展開
-  unarchive:
-    src={{ work_dir }}/{{ ruby_archive_name }}
-    dest={{ work_dir }}
-    copy=no
-  when: ruby_test_vars.rc == 1 and ruby_src_test_vars.rc == 1
-
-- name: Rubyのビルド1 (configure)
-  command:
-    ./configure --disable-install-doc
-    chdir={{ work_dir }}/{{ ruby_archive_version }}
-  when: ruby_test_vars.rc == 1
-
-- name: Rubyのビルド2 (make)
-  command:
-    make
-    chdir={{ work_dir }}/{{ ruby_archive_version }}
-  when: ruby_test_vars.rc == 1
-
-- name: Rubyのインストール
+- name: Clone rbenv from GitHub
+  git:
+    repo: https://github.com/rbenv/rbenv.git
+    dest: /usr/local/rbenv
+    update: no
   become: yes
-  command:
-    make install
-    chdir={{ work_dir }}/{{ ruby_archive_version }}
-  when: ruby_test_vars.rc == 1
+  when: not ruby_installed
 
-- name: bundlerのインストール
+- name: Check if rbenv initialization exists in bashrc
+  shell: "grep -q '# rbenv initialization' ~/.bashrc"
+  register: rbenv_init_exists
+  ignore_errors: yes  # ファイル内に検索文字列がない場合にエラーを無視
+
+- name: Add rbenv initialization to bashrc
+  blockinfile:
+    path: ~/.bashrc
+    marker: ""
+    block: |
+      # rbenv initialization
+      export RBENV_ROOT="/usr/local/rbenv"
+      export PATH="$RBENV_ROOT/bin:$PATH"
+      eval "$(rbenv init -)"
+  when: not ruby_installed and rbenv_init_exists.rc != 0
+
+- name: Install ruby-build plugin
+  git:
+    repo: https://github.com/rbenv/ruby-build.git
+    dest: /usr/local/rbenv/plugins/ruby-build
+    update: no
   become: yes
-  gem:
-    name=bundler
-    version=1.17.3
-    user_install=no
-  environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  when: not ruby_installed
+
+- name: Ensure rbenv is initialized
+  shell: "source ~/.bashrc && rbenv rehash"
+  args:
+    executable: /bin/bash
+
+- name: Check if Ruby {{ ruby_version }} is installed
+  shell: "source ~/.bashrc && rbenv versions --bare"
+  register: ruby_versions
+
+- name: Install Ruby {{ ruby_version }}
+  shell: "source ~/.bashrc && rbenv install {{ ruby_version }}"
+  args:
+    creates: "/usr/local/rbenv/versions/{{ ruby_version }}"
+  when: ruby_version not in ruby_versions.stdout_lines
+
+- name: Set Ruby {{ ruby_version }} as global default
+  shell: "source ~/.bashrc && rbenv global {{ ruby_version }}"
+  when: ruby_version not in ruby_versions.stdout_lines
+
+- name: Rehash rbenv
+  shell: "source ~/.bashrc && rbenv rehash"
+
+- name: Verify Ruby installation
+  shell: "source ~/.bashrc && ruby -v"
+

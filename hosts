@@ -1,2 +1,2 @@
-[redmine-servers]
+[redmineserver]
 localhost ansible_connection=local
