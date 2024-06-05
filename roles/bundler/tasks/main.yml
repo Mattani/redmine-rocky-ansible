@@ -18,3 +18,7 @@
   debug:
     msg: "Bundler version is {{ bundler_version.stdout }}"
 
+- name: create gem_version by replacing the last digit of ruby_version with 0
+  set_fact:
+    gem_version: "{{ ruby_version | regex_replace('\\.[0-9]+$', '.0') }}"
+

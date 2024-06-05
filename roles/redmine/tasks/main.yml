@@ -74,17 +74,6 @@
   when:
     result_test_gemfile.rc == 0
 
-#- name: gem update base64
-#  become: yes
-#  shell: gem update base64
-#  args:
-#    chdir: "{{ redmine_dir }}"
-#  environment:
-#    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-#  when:
-#    result_test_gemfile.rc == 1
-#  register: bundle_install_result
-
 - name: secret tokenの作成
   become: yes
   shell: |

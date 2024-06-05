@@ -34,16 +34,6 @@
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-
-- name: PassengerのApache用モジュールのインストール
-  become: yes
-  shell: |
-    source ~/.bashrc
-    passenger-install-apache2-module --auto
-  args:
-    chdir: "{{ redmine_dir }}"
-  environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when: result.rc == 1
 
 - name: PassengerのApache用モジュールの設定を取得

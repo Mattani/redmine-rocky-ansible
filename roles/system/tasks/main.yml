@@ -72,9 +72,13 @@
     mode=0755
 
 - name: Check current swap status
-  command: free -m | grep Swap | awk '{print $2}'
+  shell: "free -m | grep Swap | awk '{print $2}'"
   register: swap_status
   changed_when: false
+
+- name: Debug swap status
+  debug:
+    msg: "Current swap size: {{ swap_status.stdout.strip() }}"
 
 - name: Create a swap file if no swap is available
   shell: |
