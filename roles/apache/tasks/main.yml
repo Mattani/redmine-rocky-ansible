@@ -8,7 +8,7 @@
 
 - name: Passengerがインストールされているか確認
   command:
-    test -f /usr/local/bin/passenger-install-apache2-module
+    test -f /usr/local/rbenv/shims/passenger-install-apache2-module
   register:
     result
   failed_when: result.rc not in [0, 1]
@@ -16,23 +16,39 @@
 
 - name: Passengerをインストール
   become: yes
-  gem:
-    name=passenger
-    user_install=no
+  shell: |
+    source ~/.bashrc
+    gem install passenger
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when: result.rc == 1
 
 - name: PassengerのApache用モジュールのインストール
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     passenger-install-apache2-module --auto
+  args:
+    chdir: "{{ redmine_dir }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: PassengerのApache用モジュールのインストール
+  become: yes
+  shell: |
+    source ~/.bashrc
+    passenger-install-apache2-module --auto
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when: result.rc == 1
 
 - name: PassengerのApache用モジュールの設定を取得
-  command:
+  shell: |
+    source ~/.bashrc
     passenger-install-apache2-module --snippet
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"

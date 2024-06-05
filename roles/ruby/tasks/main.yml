@@ -43,6 +43,11 @@
   become: yes
   when: not ruby_installed
 
+- name: Install libyaml-devel
+  become: yes
+  yum:
+    name='libyaml-devel'
+
 - name: Ensure rbenv is initialized
   shell: "source ~/.bashrc && rbenv rehash"
   args:

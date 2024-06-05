@@ -1,9 +1,10 @@
-- hosts: redmine-servers
+- hosts: redmineserver
 
   roles:
     - system
     - pg
     - ruby
+    - bundler
     - redmine
     - apache
 

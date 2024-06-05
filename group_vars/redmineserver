@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------
 # データベースの redmine ユーザーのパスワード (変更推奨)
-db_passwd_redmine: Must_be_changed!
+db_passwd_redmine: changed_passw0rd
 # ----------------------------------------------------------------------
 
 # Redmineのチェックアウト元URL
@@ -19,6 +19,9 @@ redmine_dir_group: apache
 
 # Redmineで使用する日本語フォントファイル
 redmine_font_path: /usr/share/fonts/google-noto-cjk/NotoSansCJKjp-Regular.otf
+
+# Redmineで使用するlocale
+redmine_locale: ja_JP.UTF-8
 
 # pg_hba.confのパス
 pg_hba_conf_path: /var/lib/pgsql/data/pg_hba.conf

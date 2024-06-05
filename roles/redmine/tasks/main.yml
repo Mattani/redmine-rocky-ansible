@@ -31,7 +31,7 @@
 
 - name: bundle config path
   become: yes
-  shell: bundle config set --local path 'vendor/bundle'
+  shell: "source ~/.bashrc&&bundle config set --local path 'vendor/bundle'"
   args:
     chdir: "{{ redmine_dir }}"
   environment:
@@ -41,7 +41,7 @@
 
 - name: bundle config without
   become: yes
-  shell: bundle config set --local without 'development test'
+  shell: "source ~/.bashrc&&bundle config set --local without 'development test'"
   args:
     chdir: "{{ redmine_dir }}"
   environment:
@@ -51,7 +51,9 @@
 
 - name: bundle install
   become: yes
-  shell: bundle install
+  shell: |
+    source ~/.bashrc
+    bundle install
   args:
     chdir: "{{ redmine_dir }}"
   environment:
@@ -62,9 +64,11 @@
 
 - name: bundle update
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle update
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when:
@@ -83,27 +87,33 @@
 
 - name: secret tokenの作成
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rake generate_secret_token
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
 
 - name: データベースのマイグレーション
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rake db:migrate
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
 
 - name: デフォルトデータ(日本語)をロード
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rake redmine:load_default_data
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
@@ -119,9 +129,11 @@
 
 - name: テーマをfarend_basicに切り替え
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rails r 'Setting["ui_theme"]="farend_basic"'
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
@@ -130,9 +142,11 @@
 
 - name: デフォルトの言語を日本語に変更
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rails r 'Setting["default_language"]="ja"'
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
@@ -141,9 +155,11 @@
 
 - name: ユーザー名の表示形式を「姓 名」に変更
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rails r 'Setting["user_format"]=:lastname_firstname'
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
@@ -152,9 +168,11 @@
 
 - name: 添付ファイルとリポジトリのエンコーディングを設定
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rails r 'Setting["repositories_encodings"]="UTF-8,CP932,EUC-JP"'
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
@@ -163,9 +181,11 @@
 
 - name: 添付ファイルのサムネイルを表示
   become: yes
-  command:
+  shell: |
+    source ~/.bashrc
     bundle exec rails r 'Setting["thumbnails_enabled"]="1"'
-    chdir={{ redmine_dir }}
+  args:
+    chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production

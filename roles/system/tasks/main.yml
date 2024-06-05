@@ -41,7 +41,7 @@
 - name: RubyとPassengerのビルドに必要な開発ツールやヘッダファイルのインストール
   become: yes
   yum:
-    name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libyaml-devel,libffi-devel'
+    name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libffi-devel'
 
 - name:  PostgreSQLとヘッダファイルのインストール
   become: yes
@@ -70,3 +70,26 @@
   file: path={{ work_dir }}
     state=directory
     mode=0755
+
+- name: Check current swap status
+  command: free -m | grep Swap | awk '{print $2}'
+  register: swap_status
+  changed_when: false
+
+- name: Create a swap file if no swap is available
+  shell: |
+    dd if=/dev/zero of=/swapfile bs=1M count=2048
+    chmod 600 /swapfile
+    mkswap /swapfile
+  when: swap_status.stdout|int == 0
+
+- name: Enable the swap file
+  command: swapon /swapfile
+  when: swap_status.stdout|int == 0
+
+- name: Add swap entry to fstab
+  lineinfile:
+    path: /etc/fstab
+    line: '/swapfile swap swap defaults 0 0'
+    create: yes
+  when: swap_status.stdout|int == 0
