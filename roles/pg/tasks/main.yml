@@ -31,11 +31,11 @@
   when:
     result_pg_hba.rc == 1
 
-- name: create locale ja_JP.UTF-8
+- name: create locale {{ redmine_locale }}
   become: yes
   shell: localedef -i ja_JP -c -f UTF-8 -A /usr/share/locale/locale.alias {{ redmine_locale }}
 
-- name: set locale to ja_JP.UTF-8
+- name: set locale to {{ redmine_locale }}
   become: yes
   shell: localectl set-locale LANG={{ redmine_locale }}
 
@@ -61,6 +61,6 @@
   postgresql_db:
     name=redmine
     encoding='UTF-8'
-    lc_collate='ja_JP.UTF-8'
-    lc_ctype='ja_JP.UTF-8'
+    lc_collate={{ redmine_locale }}
+    lc_ctype={{ redmine_locale }}
     template='template0'

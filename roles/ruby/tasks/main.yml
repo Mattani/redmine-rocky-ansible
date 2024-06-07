@@ -1,15 +1,19 @@
 - name: Rubyがインストールされているか確認
-  ansible.builtin.command: ruby -v
+  shell: source ~/.bashrc && ruby -v
   register: ruby_version_output
   ignore_errors: yes
+
+- name: Debug message
+  debug:
+    msg: "Ruby version: {{ ruby_version_output.stdout }}"
 
 - name: Check if Ruby is installed
   ansible.builtin.set_fact:
     ruby_installed: "{{ ruby_version_output.rc == 0 }}"
 
-#- name: Debug message
-#  debug:
-#    msg: "Ruby is {{ 'installed' if ruby_installed else 'not installed' }}"
+- name: Debug message
+  debug:
+    msg: "Ruby is {{ 'installed' if ruby_installed else 'not installed' }}"
 
 - name: Clone rbenv from GitHub
   git:
