@@ -49,6 +49,13 @@
   when:
     result_test_gemfile.rc == 1
 
+- name: Gemfile.localを作成
+  become: yes
+  template:
+    src=Gemfile.local
+    dest={{ redmine_dir }}/Gemfile.local
+    force=no
+
 - name: bundle install
   become: yes
   shell: |
