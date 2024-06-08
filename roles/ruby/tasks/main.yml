@@ -69,7 +69,6 @@
 
 - name: Set Ruby {{ ruby_version }} as global default
   shell: "source ~/.bashrc && rbenv global {{ ruby_version }}"
-  when: ruby_version not in ruby_versions.stdout_lines
 
 - name: Rehash rbenv
   shell: "source ~/.bashrc && rbenv rehash"

@@ -6,12 +6,10 @@
     group: "{{ redmine_dir_group }}"
     recurse: yes
 
-- name: Passengerがインストールされているか確認
-  command:
-    test -f /usr/local/rbenv/shims/passenger-install-apache2-module
-  register:
-    result
-  failed_when: result.rc not in [0, 1]
+- name: Passengerが現在のrubyバージョンでインストールされているか確認
+  command: /usr/local/rbenv/shims/gem list -i passenger
+  register: passenger_installed_result
+  failed_when: false
   changed_when: false
 
 - name: Passengerをインストール
@@ -23,7 +21,7 @@
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-  when: result.rc == 1
+  when: passenger_installed_result.stdout != 'true'
 
 - name: PassengerのApache用モジュールのインストール
   become: yes
@@ -34,7 +32,7 @@
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-  when: result.rc == 1
+  when: passenger_installed_result.stdout != 'true'
 
 - name: PassengerのApache用モジュールの設定を取得
   shell: |

@@ -120,12 +120,11 @@
   become: yes
   shell: |
     source ~/.bashrc
-    bundle exec rails r 'Setting["ui_theme"]="farend_basic"'
+    RAILS_ENV=production bundle exec rails r 'Setting["ui_theme"]="farend_basic"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-    RAILS_ENV: production
   when:
     result_database_yml is changed
 
@@ -133,12 +132,11 @@
   become: yes
   shell: |
     source ~/.bashrc
-    bundle exec rails r 'Setting["default_language"]="ja"'
+    RAILS_ENV=production bundle exec rails r 'Setting["default_language"]="ja"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-    RAILS_ENV: production
   when:
     result_database_yml is changed
 
@@ -146,12 +144,11 @@
   become: yes
   shell: |
     source ~/.bashrc
-    bundle exec rails r 'Setting["user_format"]=:lastname_firstname'
+    RAILS_ENV=production bundle exec rails r 'Setting["user_format"]=:lastname_firstname'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-    RAILS_ENV: production
   when:
     result_database_yml is changed
 
@@ -159,12 +156,11 @@
   become: yes
   shell: |
     source ~/.bashrc
-    bundle exec rails r 'Setting["repositories_encodings"]="UTF-8,CP932,EUC-JP"'
+    RAILS_ENV=production bundle exec rails r 'Setting["repositories_encodings"]="UTF-8,CP932,EUC-JP"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-    RAILS_ENV: production
   when:
     result_database_yml is changed
 
@@ -172,11 +168,10 @@
   become: yes
   shell: |
     source ~/.bashrc
-    bundle exec rails r 'Setting["thumbnails_enabled"]="1"'
+    RAILS_ENV=production bundle exec rails r 'Setting["thumbnails_enabled"]="1"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
-    RAILS_ENV: production
   when:
     result_database_yml is changed

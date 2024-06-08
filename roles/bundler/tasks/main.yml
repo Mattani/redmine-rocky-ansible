@@ -5,10 +5,7 @@
     executable: /usr/local/rbenv/shims/gem
 
 - name: Update Bundler to the latest version
-  gem:
-    name: bundler
-    state: latest
-    executable: /usr/local/rbenv/shims/gem
+  shell: /usr/local/rbenv/shims/gem update bundler
 
 - name: Verify Bundler version
   shell: "source ~/.bashrc &&bundler --version"
