@@ -5,6 +5,12 @@
     dest={{ redmine_dir }}
     version={{ redmine_version }}
 
+- name: RedmineのURLおよびバージョンを表示
+  debug:
+    msg: 
+      - "repo: {{ redmine_git_url }}"
+      - "version: {{ redmine_version }}"
+
 - name: database.ymlの作成
   become: yes
   template:
@@ -114,24 +120,6 @@
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
     RAILS_ENV: production
     REDMINE_LANG: ja
-  when:
-    result_database_yml is changed
-
-- name: farend_basicテーマのダウンロード
-  become: yes
-  git:
-    repo=https://github.com/farend/redmine_theme_farend_basic.git
-    dest={{ redmine_dir }}/public/themes/farend_basic
-
-- name: テーマをfarend_basicに切り替え
-  become: yes
-  shell: |
-    source ~/.bashrc
-    RAILS_ENV=production bundle exec rails r 'Setting["ui_theme"]="farend_basic"'
-  args:
-    chdir: "{{ redmine_dir }}"
-  environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
   when:
     result_database_yml is changed
 

@@ -1,0 +1,36 @@
+- name: テーマをdefaultに切り替え
+  become: yes
+  shell: |
+    source ~/.bashrc
+    RAILS_ENV=production bundle exec rails r 'Setting["ui_theme"]="default"'
+  args:
+    chdir: "{{ redmine_dir }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+
+- name: farend_basicテーマ(propshaft対応)のダウンロード
+  become: yes
+  git:
+    repo=https://github.com/farend/redmine_theme_farend_basic.git
+    dest={{ redmine_dir }}/themes/farend_basic
+    version=support-propshaft
+  when: redmine_version in redmine_versions_supports_propshaft
+
+- name: farend_basicテーマのダウンロード
+  become: yes
+  git:
+    repo=https://github.com/farend/redmine_theme_farend_basic.git
+    dest={{ redmine_dir }}/public/themes/farend_basic
+  when: not redmine_version in redmine_versions_supports_propshaft
+
+#- name: テーマをfarend_basicに切り替え
+#  become: yes
+#  shell: |
+#    source ~/.bashrc
+#    RAILS_ENV=production bundle exec rails r 'Setting["ui_theme"]="farend_basic"'
+#  args:
+#    chdir: "{{ redmine_dir }}"
+#  environment:
+#    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+
+
