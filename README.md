@@ -12,9 +12,13 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 
 ただし以下の点はMattaniが独自の修正をいれております
 
-* OSはRocky Linux 8.9を使用します
-* Rubyはrbenvによりインストールします
-* Redmine/RedMicaをgitリポジトリから取得するように改変しています
+* OSはRocky Linux 8.9を使用
+* Rubyはrbenvによりインストール
+* Redmine/RedMicaをgitリポジトリから取得
+* Swap領域の設定がない場合Swap領域を作成
+* (RedMica3.0.0の場合)Farend_basicテーマ（propshaft対応版）をダウンロード
+* (RedMica3.0.0以外の場合)Farend_basicテーマ(master版)をダウンロード
+* builder(3.0.0)gemをインストールしないようにGemfile.localを作成
 
 ## システム構成
 

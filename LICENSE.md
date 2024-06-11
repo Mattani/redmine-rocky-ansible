@@ -25,4 +25,8 @@ THE SOFTWARE.
 Modifications:
 - Changed from CentOS to Rocky Linux 8.9 as the OS
 - Modified to obtain Redmine/RedMica from the git repository
-- Installed Ruby using rbenv
+- Install Ruby using rbenv
+- Create Swap if swap is 0
+- For RedMica 3.0.0, install Farend_basic (propshaft version)
+- Not for RedMica 3.0.0, install the Farend_basic theme (master version)
+- Create a Gemfile.local to avoid installing the builder(3.0.0) gem
