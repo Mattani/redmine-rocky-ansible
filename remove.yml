@@ -1,0 +1,9 @@
+- hosts: redmineserver
+
+  roles:
+    - remove
+
+  post_tasks:
+    - name: 完了
+      debug:
+        msg='RedmineのDBと/var/lib/rdmineディレクトリを削除しました'

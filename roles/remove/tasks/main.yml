@@ -1,0 +1,17 @@
+- name: Stop httpd server
+  become: yes
+  command: systemctl stop httpd
+
+- name: Drop the redmine database as the postgresql user
+  become: yes
+  shell: sudo -u postgres dropdb redmine
+  register: dropdb_result
+  failed_when: "dropdb_result.rc != 0 and 'does not exist' not in dropdb_result.stderr"
+
+
+- name: Remove the redmine directory
+  become: yes
+  file:
+    path: /var/lib/redmine
+    state: absent
+
