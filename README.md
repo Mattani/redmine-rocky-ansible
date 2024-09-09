@@ -19,6 +19,7 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 * (RedMica3.0.0の場合)Farend_basicテーマ（propshaft対応版）をダウンロード
 * (RedMica3.0.0以外の場合)Farend_basicテーマ(master版)をダウンロード
 * builder(3.0.0)gemをインストールしないようにGemfile.localを作成
+* removeタスクを追加
 
 ## システム構成
 
@@ -63,6 +64,18 @@ ansible-playbook -i hosts site.yml
 ```
 
 10〜20分ほどでインストールが完了します。webブラウザで `http://サーバIPアドレス/redmine` にアクセスしてください。Redmineの画面が表示されるはずです。
+
+## Redmineのアンインストール手順
+
+以下のようにしてRedmineのDB削除と/var/lib/redmineディレクトリを削除するremoveタスクをすることで、Redmineをアンインストールすることができます。
+（インストールした各種ツール、Postgresql、Rubyは削除されません）
+インストールするRedmineのバージョンを変えたり、Rubyのバージョンを変えたりするのに、手早く現状の環境をアンインストールしたいときにご利用ください。
+
+### playbook実行
+下記コマンドを実行
+```
+ansible-playbook -i hosts remove.yml
+```
 
 ## ライセンス
 
