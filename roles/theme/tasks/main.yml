@@ -23,6 +23,22 @@
     dest={{ redmine_dir }}/public/themes/farend_basic
   when: not redmine_version in redmine_versions_supports_propshaft
 
+- name: propshaft assets re-compile
+  become: yes
+  shell: |
+    source ~/.bashrc
+    bin/rails assets:clobber assets:precompile RAILS_ENV=production RAILS_RELATIVE_URL_ROOT=/redmine
+  args:
+    chdir: "{{ redmine_dir }}"
+  when: redmine_version in redmine_versions_supports_propshaft
+
+- name: httpdの再起動
+  become: yes
+  service:
+    name=httpd
+    state=restarted
+    enabled=yes
+
 #- name: テーマをfarend_basicに切り替え
 #  become: yes
 #  shell: |
