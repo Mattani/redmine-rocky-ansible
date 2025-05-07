@@ -16,27 +16,38 @@
   command: setenforce 0
   when: result.rc == 0
 
-- name: firewalldが起動しているか確認
+- name: Ensure firewalld is started and enabled
+  become: yes
+  systemd:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Check if firewalld is running
   become: yes
   shell: firewall-cmd --state
   register: firewall_state
   ignore_errors: yes
   changed_when: false
-  check_mode: no
 
-- name: firewalldでHTTPを許可
+- name: Allow HTTP through firewalld
   become: yes
-  firewalld:
-    zone=public
-    service=http
-    permanent=yes
-    state=enabled
-    immediate=yes
+  ansible.posix.firewalld:
+    zone: public
+    service: http
+    permanent: yes
+    state: enabled
+    immediate: yes
   when: firewall_state.rc == 0
 
-- name: 開発ツールのインストール
+- name: 開発ツールとC/C++コンパイラをインストール
   become: yes
-  yum: name='@Development Tools'
+  dnf:
+    name:
+      - "@development-tools"
+      - gcc
+      - gcc-c++
+    state: present
 
 - name: RubyとPassengerのビルドに必要な開発ツールやヘッダファイルのインストール
   become: yes
@@ -53,18 +64,23 @@
   yum:
     name='httpd,httpd-devel'
 
-- name: powertoolのインストール
-  shell: dnf config-manager --set-enabled powertools
-
 - name: ImageMagickとヘッダファイル・日本語フォントのインストール
   become: yes
-  yum:
-    name='ImageMagick,ImageMagick-devel,google-noto-sans-cjk-jp-fonts'
+  dnf:
+    name:
+      - ImageMagick
+      - ImageMagick-devel
+      - google-noto-sans-cjk-jp-fonts
+    state: present
 
 - name: そのほかのツールのインストール
   become: yes
-  yum:
-    name='subversion,git,which'
+  dnf:
+    name:
+      - subversion
+      - git
+      - which
+    state: present
 
 - name: 作業ディレクトリ作成
   file: path={{ work_dir }}

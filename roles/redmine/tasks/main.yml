@@ -1,9 +1,10 @@
 - name: Redmineのソースコードをチェックアウト
   become: yes
   git:
-    repo={{ redmine_git_url }}
-    dest={{ redmine_dir }}
-    version={{ redmine_version }}
+    repo: "{{ redmine_git_url }}"
+    dest: "{{ redmine_dir }}"
+    version: "{{ redmine_version }}"
+    update: no
 
 - name: RedmineのURLおよびバージョンを表示
   debug:
@@ -55,12 +56,12 @@
   when:
     result_test_gemfile.rc == 1
 
-- name: Gemfile.localを作成
-  become: yes
-  template:
-    src=Gemfile.local
-    dest={{ redmine_dir }}/Gemfile.local
-    force=no
+- name: Patch Gemfile to update commonmarker if Redmine < 6.1.0
+  lineinfile:
+    path: "{{ redmine_dir }}/Gemfile"
+    regexp: '^\s*gem\s+["'']commonmarker["'']'
+    line: '  gem "commonmarker", "~> 1.1.0"'
+  when: redmine_version is version('6.1.0', '<')
 
 - name: bundle install
   become: yes
@@ -100,9 +101,7 @@
 
 - name: データベースのマイグレーション
   become: yes
-  shell: |
-    source ~/.bashrc
-    bundle exec rake db:migrate
+  shell: bundle exec rake db:migrate
   args:
     chdir: "{{ redmine_dir }}"
   environment:

@@ -64,3 +64,12 @@
     lc_collate={{ redmine_locale }}
     lc_ctype={{ redmine_locale }}
     template='template0'
+
+- name: Redmineユーザーにスキーマとテーブル・シーケンスへの権限を付与
+  become: yes
+  become_user: postgres
+  shell: |
+    psql -d redmine -c "GRANT CREATE ON SCHEMA public TO redmine;"
+    psql -d redmine -c "GRANT ALL ON ALL TABLES IN SCHEMA public TO redmine;"
+    psql -d redmine -c "GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO redmine;"
+

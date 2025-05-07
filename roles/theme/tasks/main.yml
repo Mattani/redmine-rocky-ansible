@@ -8,29 +8,40 @@
   environment:
     PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
 
-- name: farend_basicテーマ(propshaft対応)のダウンロード
-  become: yes
-  git:
-    repo=https://github.com/farend/redmine_theme_farend_basic.git
-    dest={{ redmine_dir }}/themes/farend_basic
-    version=support-propshaft
-  when: redmine_version in redmine_versions_supports_propshaft
+# - name: Propshaftサポートの条件を判定
+#   set_fact:
+#     propshaft_supported: >-
+#       {{
+#         (redmine_version.startswith('v') and 
+#          (redmine_version[1:2] | int >= 3)) 
+#         or
+#         (not redmine_version.startswith('v') and 
+#          (redmine_version[0:1] | int >= 6))
+#       }}
 
-- name: farend_basicテーマのダウンロード
-  become: yes
-  git:
-    repo=https://github.com/farend/redmine_theme_farend_basic.git
-    dest={{ redmine_dir }}/public/themes/farend_basic
-  when: not redmine_version in redmine_versions_supports_propshaft
+# - name: farend_basicテーマ(propshaft対応)のダウンロード
+#   become: yes
+#   git:
+#     repo: https://github.com/farend/redmine_theme_farend_basic.git
+#     dest: "{{ redmine_dir }}/themes/farend_basic"
+#     version: support-propshaft
+#   when: propshaft_supported
 
-- name: propshaft assets re-compile
-  become: yes
-  shell: |
-    source ~/.bashrc
-    bin/rails assets:clobber assets:precompile RAILS_ENV=production RAILS_RELATIVE_URL_ROOT=/redmine
-  args:
-    chdir: "{{ redmine_dir }}"
-  when: redmine_version in redmine_versions_supports_propshaft
+# - name: farend_basicテーマのダウンロード
+#   become: yes
+#   git:
+#     repo: https://github.com/farend/redmine_theme_farend_basic.git
+#     dest: "{{ redmine_dir }}/public/themes/farend_basic"
+#   when: not propshaft_supported
+
+# - name: propshaft assets re-compile
+#   become: yes
+#   shell: |
+#     source ~/.bashrc
+#     bin/rails assets:clobber assets:precompile RAILS_ENV=production RAILS_RELATIVE_URL_ROOT=/redmine
+#   args:
+#     chdir: "{{ redmine_dir }}"
+#   when: propshaft_supported
 
 - name: httpdの再起動
   become: yes

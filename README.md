@@ -1,6 +1,6 @@
 # redmine-rocky-ansible
 
-最小構成でインストールしたRocky LinuxにRedmineを自動インストールするためのAnsibleプレイブックです。
+最小構成でインストールしたFedora LinuxにRedmineを自動インストールするためのAnsibleプレイブックです。
 
 コマンド5個実行するだけで、あとはしばらく放置すればインストールが完了します。
 
@@ -12,7 +12,7 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 
 ただし以下の点はMattaniが独自の修正をいれております
 
-* OSはRocky Linux 8.9を使用
+* OSはFedora Linux(Server edition) minimalを使用
 * Rubyはrbenvによりインストール
 * Redmine/RedMicaをgitリポジトリから取得
 * Swap領域の設定がない場合Swap領域を作成
@@ -24,19 +24,19 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 ## システム構成
 
 * Redmine/RedMica
-* Rocky Linux 8.9
+* Fedora Linux
 * PostgreSQL
 * Apache
 
 ## Redmineのインストール手順
 
-インストール直後の Rocky Linux 8.9 に root でログインし以下の操作を行ってください。
+インストール直後の Fedora Linux に root でログインし以下の操作を行ってください。
 
 ### Ansibleとgitのインストール
 
 ```
 dnf update -y
-dnf install -y epel-release glibc-locale-source
+dnf install -y glibc-locale-source
 dnf install -y ansible git
 ```
 
