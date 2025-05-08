@@ -91,20 +91,3 @@ H.Matsutani -- [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://r
 
 このプレイブックはファーエンドテクノロジー株式会社作成の [`farend/redmine-centos-ansible`](https://github.com/farend/redmine-centos-ansible)  をベースに改変したものです
 
-
-①-1
-sudo dnf install rust cargo
-
-①-2
-curl https://sh.rustup.rs -sSf | sh
-何回か1を入力
-source $HOME/.cargo/env
-
-②
-sudo dnf install clang clang-devel llvm-devel
-bundle install
-
-①-2　+　②
-はいけたが入力があるのでAnsibleスクリプト化できるか？
-
-①-1　＋　②でいけるかどうか
