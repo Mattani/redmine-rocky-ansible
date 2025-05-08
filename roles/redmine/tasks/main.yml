@@ -56,6 +56,16 @@
   when:
     result_test_gemfile.rc == 1
 
+- name: bundle config set force_ruby_platform true
+  become: yes
+  shell: "source ~/.bashrc&&bundle config set force_ruby_platform true"
+  args:
+    chdir: "{{ redmine_dir }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+  when:
+    result_test_gemfile.rc == 1
+
 - name: Patch Gemfile to update commonmarker if Redmine < 6.1.0
   lineinfile:
     path: "{{ redmine_dir }}/Gemfile"

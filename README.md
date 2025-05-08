@@ -1,6 +1,6 @@
 # redmine-rocky-ansible
 
-最小構成でインストールしたFedora LinuxにRedmineを自動インストールするためのAnsibleプレイブックです。
+最小構成でインストールしたRocky LinuxにRedmineを自動インストールするためのAnsibleプレイブックです。
 
 コマンド5個実行するだけで、あとはしばらく放置すればインストールが完了します。
 
@@ -12,7 +12,7 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 
 ただし以下の点はMattaniが独自の修正をいれております
 
-* OSはFedora Linux(Server edition) minimalを使用
+* OSはRocky Linux 8.10を使用
 * Rubyはrbenvによりインストール
 * Redmine/RedMicaをgitリポジトリから取得
 * Swap領域の設定がない場合Swap領域を作成
@@ -24,19 +24,19 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 ## システム構成
 
 * Redmine/RedMica
-* Fedora Linux
+* Rocky Linux 8.10
 * PostgreSQL
 * Apache
 
 ## Redmineのインストール手順
 
-インストール直後の Fedora Linux に root でログインし以下の操作を行ってください。
+インストール直後の Rocky Linux 8.10 に root でログインし以下の操作を行ってください。
 
 ### Ansibleとgitのインストール
 
 ```
 dnf update -y
-dnf install -y glibc-locale-source
+dnf install -y epel-release glibc-locale-source
 dnf install -y ansible git
 ```
 
@@ -91,3 +91,20 @@ H.Matsutani -- [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://r
 
 このプレイブックはファーエンドテクノロジー株式会社作成の [`farend/redmine-centos-ansible`](https://github.com/farend/redmine-centos-ansible)  をベースに改変したものです
 
+
+①-1
+sudo dnf install rust cargo
+
+①-2
+curl https://sh.rustup.rs -sSf | sh
+何回か1を入力
+source $HOME/.cargo/env
+
+②
+sudo dnf install clang clang-devel llvm-devel
+bundle install
+
+①-2　+　②
+はいけたが入力があるのでAnsibleスクリプト化できるか？
+
+①-1　＋　②でいけるかどうか

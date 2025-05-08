@@ -44,7 +44,7 @@
   become: yes
   dnf:
     name:
-      - "@development-tools"
+      - "@development tools"
       - gcc
       - gcc-c++
     state: present
@@ -64,14 +64,43 @@
   yum:
     name='httpd,httpd-devel'
 
+- name: Enable powertools repository
+  dnf:
+    name: "@Development"
+    state: present
+    enablerepo: powertools
+
+- name: Enable PowerTools repository via dnf config-manager
+  command: dnf config-manager --set-enabled powertools
+  become: yes
+
 - name: ImageMagickとヘッダファイル・日本語フォントのインストール
   become: yes
   dnf:
     name:
       - ImageMagick
       - ImageMagick-devel
-      - google-noto-sans-cjk-jp-fonts
+      - google-noto-sans-cjk-ttc-fonts
     state: present
+
+- name: Install required packages (clang, llvm)
+  become: true
+  dnf:
+    name:
+      - clang
+      - clang-devel
+      - llvm-devel
+    state: present
+    
+- name: Install Rust using rustup (non-interactive)
+  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
+
+- name: Source cargo environment for future tasks (only applies to this session)
+  shell: echo 'source $HOME/.cargo/env' >> ~/.bashrc
+  args:
+    executable: /bin/bash
 
 - name: そのほかのツールのインストール
   become: yes
