@@ -1,4 +1,11 @@
-- name: SELinuxの状態確認
+- name: Fail if db_passwd_redmine is not changed from default
+  fail:
+    msg: >
+      The variable db_passwd_redmine is still set to the default value "Must_be_changed!".
+      Please change it in group_vars before running this playbook.
+  when: db_passwd_redmine == "Must_be_changed!"
+  
+  - name: SELinuxの状態確認
   command:
     /usr/sbin/selinuxenabled
   register:
