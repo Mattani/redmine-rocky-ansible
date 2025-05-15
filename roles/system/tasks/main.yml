@@ -54,14 +54,8 @@
   yum:
     name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libffi-devel'
 
-- name: Enable PostgreSQL 16 DNF module
-  hosts: all
-  become: yes
-  tasks:
-    - name: Enable postgresql:16 module
-      ansible.builtin.command: dnf -y module enable postgresql:16
-      args:
-        warn: false
+- name: Enable postgresql:16 module
+  command: dnf -y module enable postgresql:16
 
 - name:  PostgreSQLとヘッダファイルのインストール
   become: yes
