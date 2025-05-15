@@ -41,22 +41,20 @@
     enabled: yes
   when: firewall_state.rc == 0
 
-- name: Get default network interface
+- name: Get default route via `ip route`
   command: ip route show default
-  register: default_route
-  changed_when: false
+  register: ip_route_output
   when: firewall_state.rc == 0
 
-- name: Extract interface name using regex
+- name: Debug ip route output
+  debug:
+    msg: "{{ ip_route_output.stdout }}"
+
+- name: Extract default interface name from ip route
   set_fact:
-    default_interface: "{{ default_route.stdout | regex_search('dev (\\S+)', '\\1') }}"
+    default_interface: "{{ (ip_route_output.stdout | regex_findall('dev\\s+(\\S+)'))[0] | default('NOT FOUND', true) }}"
   when: firewall_state.rc == 0
     
-- name: Extract interface name from default route
-  set_fact:
-    default_interface: "{{ default_route.stdout.split()[-1] }}"
-  when: firewall_state.rc == 0
-
 - name: Get active connections
   command: nmcli -t -f NAME,DEVICE connection show --active
   register: active_connections
