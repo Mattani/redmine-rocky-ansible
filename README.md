@@ -16,7 +16,10 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 * Rubyはrbenvによりインストール
 * Redmine/RedMicaをgitリポジトリから取得
 * Swap領域の設定がない場合Swap領域を作成
+* Redmineバージョンが6.1.0以下の場合、Gemfileにパッチをあててcommonmarker gemのバージョンを上げている※
 * removeタスクを追加
+
+※ https://www.redmine.org/issues/40197
 
 ## システム構成
 

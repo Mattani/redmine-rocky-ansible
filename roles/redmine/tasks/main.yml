@@ -70,7 +70,7 @@
   lineinfile:
     path: "{{ redmine_dir }}/Gemfile"
     regexp: '^\s*gem\s+["'']commonmarker["'']'
-    line: '  gem "commonmarker", "~> 1.1.0"'
+    line: '  gem "commonmarker", "~> 2.3.0"'
   when: redmine_version is version('6.1.0', '<')
 
 - name: bundle install
