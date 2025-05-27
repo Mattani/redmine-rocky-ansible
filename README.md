@@ -53,6 +53,7 @@ git clone https://github.com/Mattani/redmine-rocky-ansible.git
   * `redmine_version` はRedmine/RedMicaのリポジトリで定義されているタグ名をご使用ください
 * PostgreSQLに設定するパスワードの変更
   * `db_passwd_redmine` を適当な内容に変更してください。これはPostgreSQLのRedmine用ユーザー redmine に設定されるパスワードです。
+  * パスワードがデフォルトのままだとエラーになるようにしました。必ず変更してください。
 
 ### playbook実行
 
@@ -63,7 +64,7 @@ cd redmine-rocky-ansible
 ansible-playbook -i hosts site.yml
 ```
 
-10〜20分ほどでインストールが完了します。webブラウザで `http://サーバIPアドレス/redmine` にアクセスしてください。Redmineの画面が表示されるはずです。
+30分ほどでインストールが完了します。webブラウザで `http://サーバIPアドレス/redmine` にアクセスしてください。Redmineの画面が表示されるはずです。
 
 ## Redmineのアンインストール手順
 
