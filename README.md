@@ -12,25 +12,25 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 
 ただし以下の点はMattaniが独自の修正をいれております
 
-* OSはRocky Linux 8.9を使用
+* OSはRocky Linux 8.10を使用
 * Rubyはrbenvによりインストール
 * Redmine/RedMicaをgitリポジトリから取得
 * Swap領域の設定がない場合Swap領域を作成
-* (RedMica3.0.0の場合)Farend_basicテーマ（propshaft対応版）をダウンロード
-* (RedMica3.0.0以外の場合)Farend_basicテーマ(master版)をダウンロード
-* builder(3.0.0)gemをインストールしないようにGemfile.localを作成
+* Redmineバージョンが6.1.0以下の場合、Gemfileにパッチをあててcommonmarker gemのバージョンを上げている※
 * removeタスクを追加
+
+※ https://www.redmine.org/issues/40197
 
 ## システム構成
 
 * Redmine/RedMica
-* Rocky Linux 8.9
+* Rocky Linux 8.10
 * PostgreSQL
 * Apache
 
 ## Redmineのインストール手順
 
-インストール直後の Rocky Linux 8.9 に root でログインし以下の操作を行ってください。
+インストール直後の Rocky Linux 8.10 に root でログインし以下の操作を行ってください。
 
 ### Ansibleとgitのインストール
 
@@ -53,6 +53,7 @@ git clone https://github.com/Mattani/redmine-rocky-ansible.git
   * `redmine_version` はRedmine/RedMicaのリポジトリで定義されているタグ名をご使用ください
 * PostgreSQLに設定するパスワードの変更
   * `db_passwd_redmine` を適当な内容に変更してください。これはPostgreSQLのRedmine用ユーザー redmine に設定されるパスワードです。
+  * パスワードがデフォルトのままだとエラーになるようにしました。必ず変更してください。
 
 ### playbook実行
 
@@ -63,7 +64,7 @@ cd redmine-rocky-ansible
 ansible-playbook -i hosts site.yml
 ```
 
-10〜20分ほどでインストールが完了します。webブラウザで `http://サーバIPアドレス/redmine` にアクセスしてください。Redmineの画面が表示されるはずです。
+30分ほどでインストールが完了します。webブラウザで `http://サーバIPアドレス/redmine` にアクセスしてください。Redmineの画面が表示されるはずです。
 
 ## Redmineのアンインストール手順
 

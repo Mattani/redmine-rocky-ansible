@@ -8,8 +8,10 @@
   shell: /usr/local/rbenv/shims/gem update bundler
 
 - name: Verify Bundler version
-  shell: "source ~/.bashrc &&bundler --version"
+  shell: bundler --version
   register: bundler_version
+  environment:
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
 
 - name: Show Bundler version
   debug:

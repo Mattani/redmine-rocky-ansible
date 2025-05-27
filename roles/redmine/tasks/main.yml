@@ -1,9 +1,10 @@
 - name: Redmineのソースコードをチェックアウト
   become: yes
   git:
-    repo={{ redmine_git_url }}
-    dest={{ redmine_dir }}
-    version={{ redmine_version }}
+    repo: "{{ redmine_git_url }}"
+    dest: "{{ redmine_dir }}"
+    version: "{{ redmine_version }}"
+    update: no
 
 - name: RedmineのURLおよびバージョンを表示
   debug:
@@ -37,40 +38,50 @@
 
 - name: bundle config path
   become: yes
-  shell: "source ~/.bashrc&&bundle config set --local path 'vendor/bundle'"
+  shell: "bundle config set --local path 'vendor/bundle'"
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
   when:
     result_test_gemfile.rc == 1
 
 - name: bundle config without
   become: yes
-  shell: "source ~/.bashrc&&bundle config set --local without 'development test'"
+  shell: "bundle config set --local without 'development test'"
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
   when:
     result_test_gemfile.rc == 1
 
-- name: Gemfile.localを作成
+- name: bundle config set force_ruby_platform true
   become: yes
-  template:
-    src=Gemfile.local
-    dest={{ redmine_dir }}/Gemfile.local
-    force=no
+  shell: "bundle config set force_ruby_platform true"
+  args:
+    chdir: "{{ redmine_dir }}"
+  environment:
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+  when:
+    result_test_gemfile.rc == 1
+
+- name: Patch Gemfile to update commonmarker if Redmine < 6.1.0
+  lineinfile:
+    path: "{{ redmine_dir }}/Gemfile"
+    regexp: '^\s*gem\s+["'']commonmarker["'']'
+    line: '  gem "commonmarker", "~> 2.3.0"'
+  when: redmine_version is version('6.1.0', '<')
 
 - name: bundle install
   become: yes
   shell: |
-    source ~/.bashrc
     bundle install
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+    RAILS_ENV: production
   when:
     result_test_gemfile.rc == 1
   register: bundle_install_result
@@ -78,46 +89,42 @@
 - name: bundle update
   become: yes
   shell: |
-    source ~/.bashrc
     bundle update
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+    RAILS_ENV: production
   when:
     result_test_gemfile.rc == 0
 
 - name: secret tokenの作成
   become: yes
   shell: |
-    source ~/.bashrc
     bundle exec rake generate_secret_token
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
     RAILS_ENV: production
 
 - name: データベースのマイグレーション
   become: yes
-  shell: |
-    source ~/.bashrc
-    bundle exec rake db:migrate
+  shell: bundle exec rake db:migrate
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
     RAILS_ENV: production
 
 - name: デフォルトデータ(日本語)をロード
   become: yes
   shell: |
-    source ~/.bashrc
     bundle exec rake redmine:load_default_data
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
     RAILS_ENV: production
     REDMINE_LANG: ja
   when:
@@ -126,47 +133,47 @@
 - name: デフォルトの言語を日本語に変更
   become: yes
   shell: |
-    source ~/.bashrc
-    RAILS_ENV=production bundle exec rails r 'Setting["default_language"]="ja"'
+    bundle exec rails r 'Setting["default_language"]="ja"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+    RAILS_ENV: production
   when:
     result_database_yml is changed
 
 - name: ユーザー名の表示形式を「姓 名」に変更
   become: yes
   shell: |
-    source ~/.bashrc
-    RAILS_ENV=production bundle exec rails r 'Setting["user_format"]=:lastname_firstname'
+    bundle exec rails r 'Setting["user_format"]=:lastname_firstname'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+    RAILS_ENV: production
   when:
     result_database_yml is changed
 
 - name: 添付ファイルとリポジトリのエンコーディングを設定
   become: yes
   shell: |
-    source ~/.bashrc
-    RAILS_ENV=production bundle exec rails r 'Setting["repositories_encodings"]="UTF-8,CP932,EUC-JP"'
+    bundle exec rails r 'Setting["repositories_encodings"]="UTF-8,CP932,EUC-JP"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+    RAILS_ENV: production
   when:
     result_database_yml is changed
 
 - name: 添付ファイルのサムネイルを表示
   become: yes
   shell: |
-    source ~/.bashrc
     RAILS_ENV=production bundle exec rails r 'Setting["thumbnails_enabled"]="1"'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
+    RAILS_ENV: production
   when:
     result_database_yml is changed

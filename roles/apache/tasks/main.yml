@@ -15,31 +15,28 @@
 - name: Passengerをインストール
   become: yes
   shell: |
-    source ~/.bashrc
     gem install passenger
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
   when: passenger_installed_result.stdout != 'true'
 
 - name: PassengerのApache用モジュールのインストール
   become: yes
   shell: |
-    source ~/.bashrc
     passenger-install-apache2-module --auto
   args:
     chdir: "{{ redmine_dir }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
   when: passenger_installed_result.stdout != 'true'
 
 - name: PassengerのApache用モジュールの設定を取得
   shell: |
-    source ~/.bashrc
     passenger-install-apache2-module --snippet
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
   register:
     passenger_snippet_vars
   changed_when: false

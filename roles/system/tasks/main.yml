@@ -1,3 +1,10 @@
+- name: Fail if db_passwd_redmine is not changed from default
+  fail:
+    msg: >
+      The variable db_passwd_redmine is still set to the default value "Must_be_changed!".
+      Please change it in group_vars before running this playbook.
+  when: db_passwd_redmine == "Must_be_changed!"
+  
 - name: SELinuxの状態確認
   command:
     /usr/sbin/selinuxenabled
@@ -16,32 +23,96 @@
   command: setenforce 0
   when: result.rc == 0
 
-- name: firewalldが起動しているか確認
-  become: yes
+- name: Check if firewalld is installed and running
   shell: firewall-cmd --state
   register: firewall_state
   ignore_errors: yes
   changed_when: false
-  check_mode: no
 
-- name: firewalldでHTTPを許可
-  become: yes
-  firewalld:
-    zone=public
-    service=http
-    permanent=yes
-    state=enabled
-    immediate=yes
+- name: Skip message if firewalld is not running
+  debug:
+    msg: "firewalld is not running. Skipping firewall-related tasks."
+  when: firewall_state.rc != 0
+
+- name: Ensure firewalld is started and enabled
+  systemd:
+    name: firewalld
+    state: started
+    enabled: yes
   when: firewall_state.rc == 0
 
-- name: 開発ツールのインストール
+- name: Get default route via `ip route`
+  command: ip route show default
+  register: ip_route_output
+  when: firewall_state.rc == 0
+
+- name: Debug ip route output
+  debug:
+    msg: "{{ ip_route_output.stdout }}"
+
+- name: Extract default interface name from ip route
+  set_fact:
+    default_interface: "{{ (ip_route_output.stdout | regex_findall('dev\\s+(\\S+)'))[0] | default('NOT FOUND', true) }}"
+  when: firewall_state.rc == 0
+    
+- name: Get active connections
+  command: nmcli -t -f NAME,DEVICE connection show --active
+  register: active_connections
+  changed_when: false
+  when: firewall_state.rc == 0
+
+- name: Extract connection name for default interface
+  set_fact:
+    connection_name: "{{ item.split(':')[0] }}"
+  loop: "{{ active_connections.stdout_lines }}"
+  when: item.split(':')[1] == default_interface
+  loop_control:
+    loop_var: item
+
+- name: Debug connection_name
+  debug:
+    msg: "Connection name: {{ connection_name | default('NOT FOUND') }}"
+
+- name: Fail if connection_name could not be determined
+  fail:
+    msg: "Could not determine the connection name for interface {{ default_interface }}."
+  when: connection_name is not defined
+
+- name: Set firewalld zone to public for the connection
+  command: >
+    nmcli connection modify "{{ connection_name }}" connection.zone public
+  when: connection_name is defined
+
+- name: Restart the connection to apply zone change
+  shell: >
+    nmcli connection down "{{ connection_name }}" && nmcli connection up "{{ connection_name }}"
+  when: connection_name is defined
+
+- name: Allow HTTP through firewalld
+  ansible.posix.firewalld:
+    zone: public
+    service: http
+    permanent: yes
+    state: enabled
+    immediate: yes
+  when: firewall_state.rc == 0
+
+- name: 開発ツールとC/C++コンパイラをインストール
   become: yes
-  yum: name='@Development Tools'
+  dnf:
+    name:
+      - "@development tools"
+      - gcc
+      - gcc-c++
+    state: present
 
 - name: RubyとPassengerのビルドに必要な開発ツールやヘッダファイルのインストール
   become: yes
   yum:
     name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libffi-devel'
+
+- name: Enable postgresql:16 module
+  command: dnf -y module enable postgresql:16
 
 - name:  PostgreSQLとヘッダファイルのインストール
   become: yes
@@ -53,18 +124,52 @@
   yum:
     name='httpd,httpd-devel'
 
-- name: powertoolのインストール
-  shell: dnf config-manager --set-enabled powertools
+- name: Enable powertools repository
+  dnf:
+    name: "@Development"
+    state: present
+    enablerepo: powertools
+
+- name: Enable PowerTools repository via dnf config-manager
+  command: dnf config-manager --set-enabled powertools
+  become: yes
 
 - name: ImageMagickとヘッダファイル・日本語フォントのインストール
   become: yes
-  yum:
-    name='ImageMagick,ImageMagick-devel,google-noto-sans-cjk-jp-fonts'
+  dnf:
+    name:
+      - ImageMagick
+      - ImageMagick-devel
+      - google-noto-sans-cjk-ttc-fonts
+    state: present
+
+- name: Install required packages (clang, llvm)
+  become: true
+  dnf:
+    name:
+      - clang
+      - clang-devel
+      - llvm-devel
+    state: present
+    
+- name: Install Rust using rustup (non-interactive)
+  shell: curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
+
+- name: Source cargo environment for future tasks (only applies to this session)
+  shell: echo 'source $HOME/.cargo/env' >> ~/.bashrc
+  args:
+    executable: /bin/bash
 
 - name: そのほかのツールのインストール
   become: yes
-  yum:
-    name='subversion,git,which'
+  dnf:
+    name:
+      - subversion
+      - git
+      - which
+    state: present
 
 - name: 作業ディレクトリ作成
   file: path={{ work_dir }}
