@@ -143,12 +143,13 @@
       - google-noto-sans-cjk-ttc-fonts
     state: present
 
-- name: Install required packages (clang, llvm)
+- name: Install required packages (clang, llvm, perl-IPC-Cmd)
   become: true
   dnf:
     name:
       - clang
       - clang-devel
+      - perl-IPC-Cmd
       - llvm-devel
     state: present
     
