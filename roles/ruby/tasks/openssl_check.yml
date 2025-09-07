@@ -1,3 +1,7 @@
+- name: Ensure ruby_configure_opts is always defined
+  set_fact:
+    ruby_configure_opts: ""
+
 - name: Check OpenSSL version
   become: yes
   shell: openssl version | awk '{print $2}'
