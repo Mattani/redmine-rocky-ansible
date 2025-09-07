@@ -24,11 +24,13 @@
   when: not ruby_installed
 
 - name: Check if rbenv initialization exists in bashrc
+  become: yes
   shell: "grep -q '# rbenv initialization' ~/.bashrc"
   register: rbenv_init_exists
   ignore_errors: yes  # ファイル内に検索文字列がない場合にエラーを無視
 
 - name: Add rbenv initialization to bashrc
+  become: yes
   blockinfile:
     path: ~/.bashrc
     marker: ""
@@ -47,32 +49,42 @@
   become: yes
   when: not ruby_installed
 
+- name: OpenSSLバージョンとRubyバージョンの条件分岐処理
+  include_tasks: openssl_check.yml
+
 - name: Install libyaml-devel
   become: yes
   yum:
     name='libyaml-devel'
 
 - name: Ensure rbenv is initialized
+  become: yes
   shell: "source ~/.bashrc && rbenv rehash"
   args:
     executable: /bin/bash
 
 - name: Check if Ruby {{ ruby_version }} is installed
+  become: yes
   shell: "source ~/.bashrc && rbenv versions --bare"
   register: ruby_versions
 
 - name: Install Ruby {{ ruby_version }}
-  shell: "source ~/.bashrc && rbenv install {{ ruby_version }}"
+  become: yes
+  shell: >
+    source ~/.bashrc && {{ 'RUBY_CONFIGURE_OPTS="' + ruby_configure_opts + '" ' if ruby_configure_opts|length > 0 else '' }}rbenv install {{ ruby_version }}
   args:
     creates: "/usr/local/rbenv/versions/{{ ruby_version }}"
   when: ruby_version not in ruby_versions.stdout_lines
 
 - name: Set Ruby {{ ruby_version }} as global default
+  become: yes
   shell: "source ~/.bashrc && rbenv global {{ ruby_version }}"
 
 - name: Rehash rbenv
+  become: yes
   shell: "source ~/.bashrc && rbenv rehash"
 
 - name: Verify Ruby installation
+  become: yes
   shell: "source ~/.bashrc && ruby -v"
 

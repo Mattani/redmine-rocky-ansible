@@ -168,10 +168,14 @@
   args:
     creates: "{{ ansible_env.HOME }}/.cargo/bin/rustc"
 
-- name: Source cargo environment for future tasks (only applies to this session)
-  shell: echo 'source $HOME/.cargo/env' >> ~/.bashrc
-  args:
-    executable: /bin/bash
+- name: Source cargo environment for future tasks
+  become: yes
+  lineinfile:
+    path: ~/.bashrc
+    line: 'source $HOME/.cargo/env'
+    insertafter: EOF
+    state: present
+    create: yes
 
 - name: そのほかのツールのインストール
   become: yes
@@ -197,6 +201,7 @@
     msg: "Current swap size: {{ swap_status.stdout.strip() }}"
 
 - name: Create a swap file if no swap is available
+  become: yes
   shell: |
     dd if=/dev/zero of=/swapfile bs=1M count=2048
     chmod 600 /swapfile
@@ -204,10 +209,12 @@
   when: swap_status.stdout|int == 0
 
 - name: Enable the swap file
+  become: yes
   command: swapon /swapfile
   when: swap_status.stdout|int == 0
 
 - name: Add swap entry to fstab
+  become: yes
   lineinfile:
     path: /etc/fstab
     line: '/swapfile swap swap defaults 0 0'
