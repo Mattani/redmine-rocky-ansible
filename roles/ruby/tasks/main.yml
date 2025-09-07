@@ -73,7 +73,7 @@
     source /etc/profile.d/rbenv.sh
     {{ 'RUBY_CONFIGURE_OPTS="' + ruby_configure_opts + '" ' if ruby_configure_opts|length > 0 else '' }}rbenv install {{ ruby_version }}
   args:
-    creates: "/usr/local/rbenv/versions/{{ ruby_version }}"
+    creates: "/usr/local/rbenv/versions/{{ ruby_version }}/bin/ruby"
   when: ruby_version not in ruby_versions.stdout_lines
 
 - name: Set Ruby {{ ruby_version }} as global default
