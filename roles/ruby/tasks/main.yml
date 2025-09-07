@@ -74,6 +74,8 @@
     {{ 'RUBY_CONFIGURE_OPTS="' + ruby_configure_opts + '" ' if ruby_configure_opts|length > 0 else '' }}rbenv install {{ ruby_version }}
   args:
     creates: "/usr/local/rbenv/versions/{{ ruby_version }}/bin/ruby"
+  async: 3600
+  poll: 10
   when: ruby_version not in ruby_versions.stdout_lines
 
 - name: Set Ruby {{ ruby_version }} as global default
