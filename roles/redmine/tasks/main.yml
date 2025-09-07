@@ -66,14 +66,15 @@
   when:
     result_test_gemfile.rc == 1
 
-- name: Patch Gemfile to update commonmarker if Redmine < 6.1.0
-  lineinfile:
-    path: "{{ redmine_dir }}/Gemfile"
-    regexp: '^\s*gem\s+["'']commonmarker["'']'
-    line: '  gem "commonmarker", "~> 2.3.0"'
-  when: >
-    (redmine_version is not match("^v") and redmine_version is version('6.1.0', '<')) or
-    (redmine_version is match("^v") and (redmine_version | regex_replace('^v', '')) is version('3.2.0', '<'))
+# - name: Patch Gemfile to update commonmarker if Redmine < 6.1.0 or RedMica < 3.2.0
+#   become: yes
+#   lineinfile:
+#     path: "{{ redmine_dir }}/Gemfile"
+#     regexp: '^\s*gem\s+["'']commonmarker["'']'
+#     line: '  gem "commonmarker", "~> 2.3.0"'
+#   when: >
+#     (redmine_version is not match("^v") and redmine_version is version('6.1.0', '<')) or
+#     (redmine_version is match("^v") and (redmine_version | regex_replace('^v', '')) is version('3.2.0', '<'))
 
 - name: bundle install
   become: yes
