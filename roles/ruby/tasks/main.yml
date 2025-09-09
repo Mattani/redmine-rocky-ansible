@@ -69,6 +69,8 @@
 
 - name: Install Ruby {{ ruby_version }}
   become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.9
   shell: |
     source /etc/profile.d/rbenv.sh
     {{ 'RUBY_CONFIGURE_OPTS="' + ruby_configure_opts + '" ' if ruby_configure_opts|length > 0 else '' }}rbenv install {{ ruby_version }}

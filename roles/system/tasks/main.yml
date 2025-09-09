@@ -115,8 +115,17 @@
 
 - name: RubyとPassengerのビルドに必要な開発ツールやヘッダファイルのインストール
   become: yes
-  yum:
-    name='openssl-devel,readline-devel,zlib-devel,curl-devel,libyaml,libffi-devel'
+  dnf:
+    name:
+      - openssl-devel
+      - readline-devel
+      - zlib-devel
+      - curl-devel
+      - libyaml
+      - libffi-devel
+      - python39
+      - python39-devel
+    state: present
 
 - name: Enable postgresql:16 module
   become: yes
