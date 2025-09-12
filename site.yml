@@ -9,7 +9,29 @@
     - apache
     - theme
 
+  tasks:
+    - name: Try AWS public IP
+      shell: curl -s http://169.254.169.254/latest/meta-data/public-ipv4 || true
+      register: aws_ip
+      changed_when: false
+
+    - name: Try GCP public IP
+      shell: curl -s -H "Metadata-Flavor: Google" "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip" || true
+      register: gcp_ip
+      changed_when: false
+
+    - name: Try Azure public IP
+      shell: curl -s -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2021-02-01&format=text" || true
+      register: azure_ip
+      changed_when: false
+
   post_tasks:
     - name: 完了
       debug:
-        msg='インストールが完了しました。 http://{{ ansible_default_ipv4.address }}/redmine/ にアクセスしてください。'
+        msg: >-
+          インストールが完了しました。 http://{{
+            (aws_ip.stdout | trim) if (aws_ip.stdout | trim) else
+            (gcp_ip.stdout | trim) if (gcp_ip.stdout | trim) else
+            (azure_ip.stdout | trim) if (azure_ip.stdout | trim) else
+            ansible_default_ipv4.address
+          }}/redmine/ にアクセスしてください。
