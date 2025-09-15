@@ -18,7 +18,7 @@ redmine_compatible_ruby_versions:
     - { version: '2.4' }
     - { version: '2.5' }
     - { version: '2.6' }
-    - { version: '2.7', min: '2.7.2' }   # 特例
+    - { version: '2.7', min: '2.7.2' }
   '4.1':
     - { version: '2.3' }
     - { version: '2.4' }
@@ -34,11 +34,9 @@ redmica_compatible_ruby_versions:
   '3.2':
     - { version: '3.1' }
     - { version: '3.2' }
-    - { version: '3.3' }
   '3.1':
     - { version: '3.1' }
     - { version: '3.2' }
-    - { version: '3.3' }
   '3.0':
     - { version: '2.7' }
     - { version: '3.0' }
@@ -71,12 +69,12 @@ redmica_compatible_ruby_versions:
     - { version: '2.4' }
     - { version: '2.5' }
     - { version: '2.6' }
-    - { version: '2.7', min: '2.7.2' }   # 特例
+    - { version: '2.7', min: '2.7.2' }
   '1.3':
     - { version: '2.4' }
     - { version: '2.5' }
     - { version: '2.6' }
-    - { version: '2.7', min: '2.7.2' }   # 特例
+    - { version: '2.7', min: '2.7.2' }
   '1.2':
     - { version: '2.3' }
     - { version: '2.4' }
@@ -93,3 +91,4 @@ redmica_compatible_ruby_versions:
     - { version: '2.4' }
     - { version: '2.5' }
     - { version: '2.6' }
+
