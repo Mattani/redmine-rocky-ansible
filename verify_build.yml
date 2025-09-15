@@ -1,0 +1,27 @@
+- hosts: redmineserver
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: rbenvディレクトリが存在するか確認
+      stat:
+        path: /usr/local/rbenv
+      register: rbenv_dir
+
+    - name: rbenvがインストールされていることをアサート
+      assert:
+        that:
+          - rbenv_dir.stat.exists
+        fail_msg: "rbenvがインストールされていません (/usr/local/rbenv がありません)"
+        success_msg: "rbenvはインストールされています"
+
+    - name: 指定されたRubyバージョンがインストールされているか確認
+      stat:
+        path: "/usr/local/rbenv/versions/{{ ruby_version }}/bin/ruby"
+      register: ruby_bin
+
+    - name: Ruby {{ ruby_version }}がインストールされていることをアサート
+      assert:
+        that:
+          - ruby_bin.stat.exists
+        fail_msg: "Ruby {{ ruby_version }}がインストールされていません"
+        success_msg: "Ruby {{ ruby_version }}はインストールされています"

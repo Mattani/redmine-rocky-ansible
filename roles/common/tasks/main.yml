@@ -1,0 +1,20 @@
+  vars_files:
+    - vars/versions.yml
+  tasks:
+    - name: Check Ruby compatibility
+      fail:
+        msg: >-
+          {{ 
+            redmine_version 
+            | detect_product 
+          }} {{ redmine_version }} is NOT compatible with Ruby {{ ruby_version }}
+      when: not (redmine_version | is_ruby_compatible(ruby_version, compatible_ruby_versions))
+
+    - name: Show success message if compatible
+      debug:
+        msg: >-
+          {{ 
+            redmine_version 
+            | detect_product 
+          }} {{ redmine_version }} is compatible with Ruby {{ ruby_version }}
+      when: redmine_version | is_ruby_compatible(ruby_version, compatible_ruby_versions)

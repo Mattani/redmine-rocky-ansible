@@ -1,6 +1,7 @@
 - hosts: redmineserver
 
   roles:
+    - common
     - system
     - pg
     - ruby
