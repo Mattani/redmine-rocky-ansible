@@ -12,22 +12,13 @@
   debug:
     msg: "openssl_version_result.stdout='{{ openssl_version_result.stdout | default('') }}'"
 
-
 - name: Set OpenSSL major version fact
   set_fact:
     openssl_major_version: "{{ (openssl_version_result.stdout.split('.')[0]) | int }}"
 
-- name: Debug openssl_major_version
-  debug:
-    msg: "openssl_major_version={{ openssl_major_version }}"
-
 - name: Check if Ruby version is 3.2 or higher
   set_fact:
     ruby_32_or_higher: "{{ (ruby_version.split('.')[0] | int > 3) or (ruby_version.split('.')[0] | int == 3 and ruby_version.split('.')[1] | int >= 2) }}"
-
-- name: Debug ruby_version and ruby_32_or_higher
-  debug:
-    msg: "ruby_version={{ ruby_version }}, ruby_32_or_higher={{ ruby_32_or_higher }}"
 
 - name: Install openssl3 and openssl3-devel if needed
   become: yes
@@ -42,7 +33,7 @@
 
 - name: Set Ruby configure opts for OpenSSL 3 if needed
   set_fact:
-    ruby_configure_opts: "--with-openssl-dir=/usr"
+    ruby_configure_opts: "--with-openssl-include=/usr/include/openssl3 --with-openssl-lib=/usr/lib64/openssl3"
   when:
   - (openssl_major_version | int) == 1
   - ruby_32_or_higher
