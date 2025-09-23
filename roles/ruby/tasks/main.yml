@@ -94,7 +94,22 @@
 
 - name: Verify Ruby installation
   become: yes
-  shell: |
-    source /etc/profile.d/rbenv.sh
-    ruby -v
+  block:
+    - name: Run ruby -v and register
+      become: yes
+      shell: |
+        source /etc/profile.d/rbenv.sh
+        ruby -v
+      register: ruby_version_output
+
+    - name: Run ruby to print linked OpenSSL version and register
+      become: yes
+      shell: |
+        source /etc/profile.d/rbenv.sh
+        ruby -ropenssl -e "puts OpenSSL::OPENSSL_VERSION"
+      register: ruby_openssl_output
+
+    - name: Show Ruby and linked OpenSSL
+      debug:
+        msg: "Ruby: {{ ruby_version_output.stdout | default('') }}; OpenSSL linked: {{ ruby_openssl_output.stdout | default('') }}"
 
