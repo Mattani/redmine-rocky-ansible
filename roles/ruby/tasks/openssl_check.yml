@@ -37,18 +37,18 @@
       - openssl3-devel
     state: present
   when:
-    - openssl_major_version == 1
-    - ruby_32_or_higher
+  - (openssl_major_version | int) == 1
+  - ruby_32_or_higher
 
 - name: Set Ruby configure opts for OpenSSL 3 if needed
   set_fact:
     ruby_configure_opts: "--with-openssl-dir=/usr"
   when:
-    - openssl_major_version == 1
-    - ruby_32_or_higher
+  - (openssl_major_version | int) == 1
+  - ruby_32_or_higher
 
 - name: Unset Ruby configure opts if not needed
   set_fact:
     ruby_configure_opts: ""
   when:
-    - openssl_major_version == 3 or (openssl_major_version == 1 and not ruby_32_or_higher)
+  - (openssl_major_version | int) == 3 or ((openssl_major_version | int) == 1 and not ruby_32_or_higher)
