@@ -10,30 +10,58 @@
     - theme
 
   tasks:
-    - name: Try AWS public IP
-      shell: curl -s http://169.254.169.254/latest/meta-data/public-ipv4 || true
-      register: aws_ip
+    - name: Read DMI product_name
+      command: cat /sys/class/dmi/id/product_name
+      register: dmi_product
       changed_when: false
+      failed_when: false
 
-    - name: Try GCP public IP
-      shell: |
-        curl -s -H "Metadata-Flavor: Google" "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip" || true
-      register: gcp_ip
+    - name: Read DMI sys_vendor
+      command: cat /sys/class/dmi/id/sys_vendor
+      register: dmi_sys_vendor
       changed_when: false
+      failed_when: false
 
-    - name: Try Azure public IP
-      shell: |
-        curl -s -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2021-02-01&format=text" || true
-      register: azure_ip
-      changed_when: false
+    - name: Detect cloud provider via DMI
+      set_fact:
+        cloud_provider: >-
+          {{
+            'aws' if (dmi_product.stdout is search('Amazon') or dmi_sys_vendor.stdout is search('Amazon')) else
+            'gcp' if (dmi_product.stdout is search('Google') or dmi_sys_vendor.stdout is search('Google')) else
+            'azure' if (dmi_product.stdout is search('Microsoft') or dmi_sys_vendor.stdout is search('Microsoft')) else
+            'none'
+          }}
+
+    - name: Try metadata endpoints as fallback (short timeout)
+      block:
+        - name: Try AWS public IP
+          shell: curl -s --connect-timeout 1 --max-time 2 http://169.254.169.254/latest/meta-data/public-ipv4 || true
+          register: aws_ip
+          changed_when: false
+          failed_when: false
+
+        - name: Try GCP public IP
+          shell: |
+            curl -s --connect-timeout 1 --max-time 2 -H "Metadata-Flavor: Google" "http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip" || true
+          register: gcp_ip
+          changed_when: false
+          failed_when: false
+
+        - name: Try Azure public IP
+          shell: |
+            curl -s --connect-timeout 1 --max-time 2 -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/publicIpAddress?api-version=2021-02-01&format=text" || true
+          register: azure_ip
+          changed_when: false
+          failed_when: false
+      when: cloud_provider == 'none'
 
     - name: Set external_ip fact (valid IP only)
       set_fact:
         external_ip: >-
           {{
-            (aws_ip.stdout | trim) if (aws_ip.stdout | trim is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')) else
-            (gcp_ip.stdout | trim) if (gcp_ip.stdout | trim is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')) else
-            (azure_ip.stdout | trim) if (azure_ip.stdout | trim is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')) else
+            (aws_ip.stdout | default('') | trim) if (aws_ip.stdout | default('') | trim is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')) else
+            (gcp_ip.stdout | default('') | trim) if (gcp_ip.stdout | default('') | trim is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')) else
+            (azure_ip.stdout | default('') | trim) if (azure_ip.stdout | default('') | trim is match('^\\d+\\.\\d+\\.\\d+\\.\\d+$')) else
             ansible_default_ipv4.address
           }}
 

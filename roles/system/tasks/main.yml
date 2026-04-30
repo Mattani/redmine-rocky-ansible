@@ -4,6 +4,25 @@
       The variable db_passwd_redmine is still set to the default value "Must_be_changed!".
       Please change it in group_vars before running this playbook.
   when: db_passwd_redmine == "Must_be_changed!"
+
+- name: Detect Rocky major version
+  shell: |
+    awk -F= '
+    /^ID=/{gsub(/"/,"",$2); id=$2}
+    /^VERSION_ID=/{gsub(/"/,"",$2); ver=$2}
+    END{ if(id=="rocky"){split(ver,a,"."); print a[1]} else {print ""} }' /etc/os-release
+  register: rocky_version_raw
+  changed_when: false
+  failed_when: false
+
+- name: Set rocky_version fact when Rocky detected
+  set_fact:
+    rocky_version: "{{ (rocky_version_raw.stdout|default('')) | int }}"
+  when: rocky_version_raw.stdout != ""
+
+- name: Debug rocky_version
+  debug:
+    msg: "rocky_version={{ rocky_version | default('NOT SET') }}"
   
 - name: SELinuxの状態確認
   command:
@@ -123,8 +142,16 @@
       - curl-devel
       - libyaml
       - libffi-devel
-      - python39
-      - python39-devel
+    state: present
+
+- name: Determine Python package names for detected Rocky version
+  set_fact:
+    python_pkgs: "{{ ['python39','python39-devel'] if (rocky_version | default(0) | int) == 8 else ['python3','python3-devel'] }}"
+
+- name: Install Python packages needed for build
+  become: yes
+  dnf:
+    name: "{{ python_pkgs }}"
     state: present
 
 - name: Enable postgresql:16 module
@@ -141,16 +168,24 @@
   yum:
     name='httpd,httpd-devel'
 
-- name: Enable powertools repository
+- name: Ensure dnf-plugins-core is installed (provides config-manager)
+  become: yes
+  dnf:
+    name: dnf-plugins-core
+    state: present
+
+- name: Enable powertools/CRB repository (Rocky specific)
   become: yes
   dnf:
     name: "@Development"
     state: present
-    enablerepo: powertools
+    enablerepo: "{{ 'powertools' if (rocky_version | default(0) | int) == 8 else 'crb' }}"
 
-- name: Enable PowerTools repository via dnf config-manager
+- name: Enable powertools/CRB repository via dnf config-manager
   become: yes
-  command: dnf config-manager --set-enabled powertools
+  shell: "dnf config-manager --set-enabled {{ 'powertools' if (rocky_version | default(0) | int) == 8 else 'crb' }}"
+  changed_when: false
+  failed_when: false
 
 - name: ImageMagickとヘッダファイル・日本語フォントのインストール
   become: yes

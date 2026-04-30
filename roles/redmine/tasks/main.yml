@@ -89,17 +89,17 @@
     result_test_gemfile.rc == 1
   register: bundle_install_result
 
-- name: bundle update
+- name: bundle install (use --deployment when Gemfile.lock exists)
   become: yes
   shell: |
-    bundle update
+    bundle install {{ '--deployment' if result_test_gemfile.rc == 0 else '' }} --path vendor/bundle --without 'development test'
   args:
     chdir: "{{ redmine_dir }}"
   environment:
     PATH: "/usr/local/rbenv/shims:{{ ansible_env.PATH }}"
     RAILS_ENV: production
-  when:
-    result_test_gemfile.rc == 0
+  when: result_test_gemfile.rc in [0, 1]
+  register: bundle_install_result
 
 - name: secret tokenの作成
   become: yes
