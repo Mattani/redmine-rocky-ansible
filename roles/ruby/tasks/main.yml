@@ -23,21 +23,18 @@
   become: yes
   when: not ruby_installed
 
-- name: Check if rbenv initialization exists in bashrc
-  shell: "grep -q '# rbenv initialization' ~/.bashrc"
-  register: rbenv_init_exists
-  ignore_errors: yes  # ファイル内に検索文字列がない場合にエラーを無視
 
-- name: Add rbenv initialization to bashrc
-  blockinfile:
-    path: ~/.bashrc
-    marker: ""
-    block: |
-      # rbenv initialization
-      export RBENV_ROOT="/usr/local/rbenv"
+- name: Set up rbenv initialization for root
+  become: yes
+  copy:
+    dest: /etc/profile.d/rbenv.sh
+    content: |
+      export RBENV_ROOT=/usr/local/rbenv
       export PATH="$RBENV_ROOT/bin:$PATH"
       eval "$(rbenv init -)"
-  when: not ruby_installed and rbenv_init_exists.rc != 0
+    owner: root
+    group: root
+    mode: '0755'
 
 - name: Install ruby-build plugin
   git:
@@ -47,32 +44,72 @@
   become: yes
   when: not ruby_installed
 
+- name: OpenSSLバージョンとRubyバージョンの条件分岐処理
+  include_tasks: openssl_check.yml
+
 - name: Install libyaml-devel
   become: yes
   yum:
     name='libyaml-devel'
 
 - name: Ensure rbenv is initialized
-  shell: "source ~/.bashrc && rbenv rehash"
+  become: yes
+  shell: |
+    source /etc/profile.d/rbenv.sh
+    rbenv rehash
   args:
     executable: /bin/bash
 
 - name: Check if Ruby {{ ruby_version }} is installed
-  shell: "source ~/.bashrc && rbenv versions --bare"
+  become: yes
+  shell: |
+    source /etc/profile.d/rbenv.sh
+    rbenv versions --bare
   register: ruby_versions
 
 - name: Install Ruby {{ ruby_version }}
-  shell: "source ~/.bashrc && rbenv install {{ ruby_version }}"
+  become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3.9
+  shell: |
+    source /etc/profile.d/rbenv.sh
+    {{ 'RUBY_CONFIGURE_OPTS="' + ruby_configure_opts + '" ' if ruby_configure_opts|length > 0 else '' }}rbenv install {{ ruby_version }}
   args:
-    creates: "/usr/local/rbenv/versions/{{ ruby_version }}"
+    creates: "/usr/local/rbenv/versions/{{ ruby_version }}/bin/ruby"
+  async: 3600
+  poll: 10
   when: ruby_version not in ruby_versions.stdout_lines
 
 - name: Set Ruby {{ ruby_version }} as global default
-  shell: "source ~/.bashrc && rbenv global {{ ruby_version }}"
+  become: yes
+  shell: |
+    source /etc/profile.d/rbenv.sh
+    rbenv global {{ ruby_version }}
 
 - name: Rehash rbenv
-  shell: "source ~/.bashrc && rbenv rehash"
+  become: yes
+  shell: |
+    source /etc/profile.d/rbenv.sh
+    rbenv rehash
 
 - name: Verify Ruby installation
-  shell: "source ~/.bashrc && ruby -v"
+  become: yes
+  block:
+    - name: Run ruby -v and register
+      become: yes
+      shell: |
+        source /etc/profile.d/rbenv.sh
+        ruby -v
+      register: ruby_version_output
+
+    - name: Run ruby to print linked OpenSSL version and register
+      become: yes
+      shell: |
+        source /etc/profile.d/rbenv.sh
+        ruby -ropenssl -e "puts OpenSSL::OPENSSL_VERSION"
+      register: ruby_openssl_output
+
+    - name: Show Ruby and linked OpenSSL
+      debug:
+        msg: "Ruby: {{ ruby_version_output.stdout | default('') }}; OpenSSL linked: {{ ruby_openssl_output.stdout | default('') }}"
 

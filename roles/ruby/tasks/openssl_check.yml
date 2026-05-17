@@ -1,0 +1,45 @@
+- name: Ensure ruby_configure_opts is always defined
+  set_fact:
+    ruby_configure_opts: ""
+
+- name: Check OpenSSL version
+  become: yes
+  shell: openssl version | awk '{print $2}'
+  register: openssl_version_result
+  changed_when: false
+
+- name: Debug OpenSSL version raw
+  debug:
+    msg: "openssl_version_result.stdout='{{ openssl_version_result.stdout | default('') }}'"
+
+- name: Set OpenSSL major version fact
+  set_fact:
+    openssl_major_version: "{{ (openssl_version_result.stdout.split('.')[0]) | int }}"
+
+- name: Check if Ruby version is 3.2 or higher
+  set_fact:
+    ruby_32_or_higher: "{{ (ruby_version.split('.')[0] | int > 3) or (ruby_version.split('.')[0] | int == 3 and ruby_version.split('.')[1] | int >= 2) }}"
+
+- name: Install openssl3 and openssl3-devel if needed
+  become: yes
+  dnf:
+    name:
+      - openssl3
+      - openssl3-devel
+    state: present
+  when:
+  - (openssl_major_version | int) == 1
+  - ruby_32_or_higher
+
+- name: Set Ruby configure opts for OpenSSL 3 if needed
+  set_fact:
+    ruby_configure_opts: "--with-openssl-include=/usr/include/openssl3 --with-openssl-lib=/usr/lib64/openssl3"
+  when:
+  - (openssl_major_version | int) == 1
+  - ruby_32_or_higher
+
+- name: Unset Ruby configure opts if not needed
+  set_fact:
+    ruby_configure_opts: ""
+  when:
+  - (openssl_major_version | int) == 3 or ((openssl_major_version | int) == 1 and not ruby_32_or_higher)

@@ -19,7 +19,7 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 * Redmineバージョンが6.1.0以下の場合、Gemfileにパッチをあててcommonmarker gemのバージョンを上げている※
 * removeタスクを追加
 
-※ https://www.redmine.org/issues/40197
+※ [https://www.redmine.org/issues/40197](https://www.redmine.org/issues/40197)
 
 ## システム構成
 
@@ -34,7 +34,7 @@ Ansibleを使ってRedmineを自動インストールするためのプレイブ
 
 ### Ansibleとgitのインストール
 
-```
+```shell
 dnf update -y
 dnf install -y epel-release glibc-locale-source
 dnf install -y ansible git
@@ -42,7 +42,7 @@ dnf install -y ansible git
 
 ### playbookのダウンロード
 
-```
+```shell
 git clone https://github.com/Mattani/redmine-rocky-ansible.git
 ```
 
@@ -59,7 +59,7 @@ git clone https://github.com/Mattani/redmine-rocky-ansible.git
 
 下記コマンドを実行してください。Redmineの自動インストールが開始されます。
 
-```
+```shell
 cd redmine-rocky-ansible
 ansible-playbook -i hosts site.yml
 ```
@@ -72,9 +72,11 @@ ansible-playbook -i hosts site.yml
 （インストールした各種ツール、Postgresql、Rubyは削除されません）
 インストールするRedmineのバージョンを変えたり、Rubyのバージョンを変えたりするのに、手早く現状の環境をアンインストールしたいときにご利用ください。
 
-### playbook実行
+### remove playbook実行
+
 下記コマンドを実行
-```
+
+```shell
 ansible-playbook -i hosts remove.yml
 ```
 
@@ -91,4 +93,3 @@ MIT License
 H.Matsutani -- [Redmine.tokyo](https://redmine.tokyo/)/[Redmine Japan](https://redmine-japan.org/)スタッフ
 
 このプレイブックはファーエンドテクノロジー株式会社作成の [`farend/redmine-centos-ansible`](https://github.com/farend/redmine-centos-ansible)  をベースに改変したものです
-
